@@ -9,12 +9,19 @@ import java.util.*;
 import java.util.function.Consumer;
 
 public class SkillCache {
+	// Map from player id to pairs of items and bit list of capabilities for that item
 	private static Map<Long,Map<Item,Integer>> cache = new HashMap<Long,Map<Item,Integer>>();
 
+	/*
+	 * Checks if player p can do action a with item i
+	 */
 	public static boolean can(UUID p, Actions a, ItemStack i) {
 		return can(p.getLeastSignificantBits(), a, i);
 	}
 
+	/*
+	 * Checks if player p can do action a with item i
+	 */
 	public static boolean can(long p, Actions a, ItemStack i) {
 		Map<Item,Integer> skills = cache.get(p);
 		if(skills == null) {
@@ -26,8 +33,6 @@ public class SkillCache {
 	}
 
 	public static void addSkill(EntityPlayer p, String regex, int pattern) {
-		p.addChatMessage(new ChatComponentText(name + " learned " + regex));
-
 		Map<Item,Integer> skills = cache.get(p.getUniqueID().getLeastSignificantBits());
 		if(skills == null) {
 			skills = new HashMap<Item,Integer>();
@@ -35,6 +40,7 @@ public class SkillCache {
 		}
 
 		Item.itemRegistry.forEach(new Cacher(skills, regex, pattern));
+		p.addChatMessage(new ChatComponentText(p.getCommandSenderName() + " learned " + regex));
 	}
 
 	public static class Cacher implements Consumer<Item> {
@@ -58,9 +64,11 @@ public class SkillCache {
 			if(i == null)
 				i = 0;
 			
+			/*
 			if(add) {
 				i |= pattern;
 			}
+			*/
 
 			skill.put(item, i);
 		}
