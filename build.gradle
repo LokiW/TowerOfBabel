@@ -15,8 +15,8 @@ apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
 version = '1.0'
-group = 'com.lokiw.towerofbabel' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
-archivesBaseName = 'towerofbabel'
+group = 'com.yourname.modid' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+archivesBaseName = 'modid'
 
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
 
@@ -114,4 +114,4 @@ publishing {
             url "file:///${project.projectDir}/mcmodsrepo"
         }
     }
-}		
+}
