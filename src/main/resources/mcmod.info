@@ -1,13 +1,13 @@
 [
 {
-  "modid": "towerofbabelmod",
+  "modid": "towerofbabel",
   "name": "Tower Of Babel Mod",
   "description": "Skill tree / progression mod.",
   "version": "${version}",
   "mcversion": "${mcversion}",
   "url": "",
   "updateUrl": "",
-  "authorList": ["LokiW". "deluxev2"],
+  "authorList": ["LokiW", "deluxev2"],
   "credits": "<3",
   "logoFile": "",
   "screenshots": [],
