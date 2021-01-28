@@ -175,7 +175,8 @@ public class ActionBlocker {
 			//armor
 			NonNullList<ItemStack> armor = p.inventory.armorInventory;
 			for(int i = 0; i < armor.size(); i++) {
-				armor.set(i, droppingCheck(w,p,Actions.WEAR,armor.get(i)));
+				if (armor.get(i).isEmpty()) continue;
+				armor.set(i,  droppingCheck(w,p,Actions.WEAR,armor.get(i)));
 			}
 			//baubles
 			//TODO
@@ -194,16 +195,31 @@ public class ActionBlocker {
 	}
 
 	private ItemStack droppingCheck(World w, EntityPlayer p, Actions a, ItemStack i) {
-		if(i != null && shouldCancel(p, a, i)) {
+		if(i != null && !i.isEmpty() && shouldCancel(p, a, i)) {
 			EntityItem item = new EntityItem(w,p.posX,p.posY+1,p.posZ,i);
 			item.setPickupDelay(200);
 			w.spawnEntity(item);
-			return null;
+			return ItemStack.EMPTY;
 		}
 		return i;
 	}
 	
 	public boolean shouldCancel(EntityPlayer p, Actions a, ItemStack i) {
+		// TEMP FOR TESTING
+		if (Actions.CARRY.equals(a)) {
+			return false;
+		}
+
+		if (Actions.HOLD.equals(a)) {
+			return false;
+		}
+
+		if (Actions.USE.equals(a)) {
+			return true;
+		}
+
+		// END OF TESTING
+
 		if(i == null || SkillCache.can(p.getUniqueID(),a,i)) {
 			return false;
 		} else if (p.getEntityWorld().isRemote || a == Actions.BREAK || a == Actions.WEAR || a == Actions.HOLD || a == Actions.CARRY) {
