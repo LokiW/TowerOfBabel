@@ -43,8 +43,8 @@ public class TowerOfBabel
 	 */
 	public static Configuration config;
 	public static boolean dimensionSpecific;
-	//public static class SkillDesc {}
-	//public static Map<String, SkillDesc> skills;
+	public static class SkillDesc {}
+	public static Map<String, SkillDesc> skills;
 
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event) {

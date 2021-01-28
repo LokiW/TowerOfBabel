@@ -23,13 +23,15 @@ public class SkillCache {
 	 * Checks if player p can do action a with item i
 	 */
 	public static boolean can(long p, Actions a, ItemStack i) {
+		return false;
+		/*
 		Map<Item,Integer> skills = cache.get(p);
 		if(skills == null) {
 			skills = new HashMap<Item, Integer>();
 			cache.put(p,skills);
 		}
 		Integer can = skills.get(i.getItem());
-		return can != null && (can & (1<<a.ordinal())) != 0;
+		return can != null && (can & (1<<a.ordinal())) != 0;*/
 	}
 
 	public static void addSkill(EntityPlayer p, String regex, int pattern) {

@@ -41,6 +41,7 @@ public class ActionBlocker {
 	public static void register() {
 		ActionBlocker ab = new ActionBlocker();
 		MinecraftForge.EVENT_BUS.register(ab);
+
 		FMLCommonHandler.instance().bus().register(ab);
 
 		//block crafting
@@ -86,25 +87,35 @@ public class ActionBlocker {
 	}
 
 	@SubscribeEvent
-	public void attempt(PlayerInteractEvent e) {
+	public void attemptUse(PlayerInteractEvent.RightClickItem e) {
 		EntityPlayer p = e.getEntityPlayer();
 		ItemStack i = p.getActiveItemStack();
 
+		System.out.println("TowerOfBabel:  Player Interacting With " + i.getItem());
 		//Place and Use
+		if(i != null) {
+			if(shouldCancel(p,Actions.USE,i)) {
+				//e.useItem = Result.DENY;
+				e.setResult(Result.DENY);	
+				e.setCanceled(true);
+			}
+		}
+	}
+
+	@SubscribeEvent
+	public void attemtInteract(PlayerInteractEvent.RightClickBlock e) {
+		EntityPlayer p = e.getEntityPlayer();
+		ItemStack i = p.getActiveItemStack();
+		System.out.println("TowerOfBabel:  Player Interacting On Block With " + i.getItem());
+		//Place
 		if(i != null) {
 			if(i.getItem() instanceof ItemBlock) {
 				if(shouldCancel(p,Actions.PLACE,i)) {
 					//e.useItem = Result.DENY;
-					e.setResult(Result.DENY);	
-				}
-			} else {
-				if(shouldCancel(p,Actions.USE,i)) {
-					//e.useItem = Result.DENY;
-					e.setResult(Result.DENY);	
+					e.setUseItem(Result.DENY);
 				}
 			}
 		}
-
 		//Interact
 		if(e.getPos().getY() != 0) {
 			TileEntity interactable = p.getEntityWorld().getTileEntity(e.getPos());
@@ -112,15 +123,29 @@ public class ActionBlocker {
 				ItemStack t = new ItemStack(interactable.getBlockType());
 				if(shouldCancel(p,Actions.INTERACT,t)) {
 					//e.useBlock = Result.DENY;
-					e.setResult(Result.DENY);
+					e.setUseBlock(Result.DENY);
 				}
 			}
 		}
-
+	}
+	
+	@SubscribeEvent
+	public void attemptBreak(PlayerInteractEvent.LeftClickBlock e) {
+		EntityPlayer p = e.getEntityPlayer();
+		ItemStack i = new ItemStack(p.getEntityWorld().getBlockState(e.getPos()).getBlock());
 		//Break
-		if(e instanceof PlayerInteractEvent.LeftClickBlock && shouldCancel(p,Actions.BREAK,i)) {
+		if(shouldCancel(p,Actions.BREAK,i)) {
+			e.setUseBlock(Result.DENY);
 			e.setCanceled(true);
 		}
+
+		ItemStack h = p.getActiveItemStack();
+		if(h != null) {
+			if(shouldCancel(p,Actions.USE,i)) {
+				e.setUseItem(Result.DENY);
+			}	
+		}
+		System.out.println("TowerOfBabel:  Player Left Clicking With " + i.getItem());
 	}
 
 	@SubscribeEvent
