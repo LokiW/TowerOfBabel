@@ -1,14 +1,14 @@
 [
 {
-  "modid": "examplemod",
-  "name": "Example Mod",
-  "description": "Example placeholder mod.",
+  "modid": "towerofbabel",
+  "name": "Tower Of Babel",
+  "description": "Skill tree / progression / restriction mod.",
   "version": "${version}",
   "mcversion": "${mcversion}",
   "url": "",
   "updateUrl": "",
-  "authorList": ["ExampleDude"],
-  "credits": "The Forge and FML guys, for making this example",
+  "authorList": ["LokiW, deluxev2"],
+  "credits": "<3",
   "logoFile": "",
   "screenshots": [],
   "dependencies": []
