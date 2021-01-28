@@ -25,7 +25,7 @@ import java.util.HashSet;
 //import com.tower.TowerSkills;
 //import com.tower.TowerBaseEntity;
 //import com.tower.TowerBase;
-//import com.babel.ActionBlocker;
+import com.towerofbabel.towerofbabelmod.babel.ActionBlocker;
 
 
 /*
@@ -85,8 +85,8 @@ public class TowerOfBabel
 	public void init(FMLInitializationEvent event)
 	{
 		//add crafting recipes and event handlers
-		/*
 		ActionBlocker.register();
+		/*
 		SkillApplicator.register();
 		TowerSkills.register();
 		*/
