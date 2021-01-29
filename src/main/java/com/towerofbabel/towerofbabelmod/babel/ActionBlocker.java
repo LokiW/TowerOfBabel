@@ -142,30 +142,30 @@ public class ActionBlocker {
 
 	@SubscribeEvent
 	public void wear(PlayerTickEvent e) {
-		EntityPlayer p = e.player;
-		World w = p.getEntityWorld();
-		if(w.isRemote) return;
-
-		if(w.getWorldTime() % 20 == 0) {
-			//armor
-			NonNullList<ItemStack> armor = p.inventory.armorInventory;
-			for(int i = 0; i < armor.size(); i++) {
-				armor.set(i, droppingCheck(w,p,Actions.WEAR,armor.get(i)));
-			}
-			//baubles
-			//TODO
-			//held item
-			InventoryPlayer ip = p.inventory;
-			ItemStack res = droppingCheck(w,p,Actions.HOLD,p.getActiveItemStack());
-			ip.setInventorySlotContents(ip.currentItem,res);
-
-			//carry
-			if(w.getWorldTime() % 13 == 0) {
-				for(int slot = 0; slot < p.inventory.getSizeInventory(); slot++) {
-					ip.setInventorySlotContents(slot, droppingCheck(w,p,Actions.CARRY,ip.getStackInSlot(slot)));
-				}
-			}
-		}
+//		EntityPlayer p = e.player;
+//		World w = p.getEntityWorld();
+//		if(w.isRemote) return;
+//
+//		if(w.getWorldTime() % 20 == 0) {
+//			//armor
+//			NonNullList<ItemStack> armor = p.inventory.armorInventory;
+//			for(int i = 0; i < armor.size(); i++) {
+//				armor.set(i, droppingCheck(w,p,Actions.WEAR,armor.get(i)));
+//			}
+//			//baubles
+//			//TODO
+//			//held item
+//			InventoryPlayer ip = p.inventory;
+//			ItemStack res = droppingCheck(w,p,Actions.HOLD,p.getActiveItemStack());
+//			ip.setInventorySlotContents(ip.currentItem,res);
+//
+//			//carry
+//			if(w.getWorldTime() % 13 == 0) {
+//				for(int slot = 0; slot < p.inventory.getSizeInventory(); slot++) {
+//					ip.setInventorySlotContents(slot, droppingCheck(w,p,Actions.CARRY,ip.getStackInSlot(slot)));
+//				}
+//			}
+//		}
 	}
 
 	private ItemStack droppingCheck(World w, EntityPlayer p, Actions a, ItemStack i) {
