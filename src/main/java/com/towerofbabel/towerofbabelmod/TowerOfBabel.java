@@ -1,31 +1,20 @@
 package com.towerofbabel.towerofbabelmod;
 
-import net.minecraft.init.Blocks;
+import com.towerofbabel.towerofbabelmod.gui.GuiProxy;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
+import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import org.apache.logging.log4j.Logger;
-import net.minecraftforge.fml.common.registry.GameRegistry;
 
-import net.minecraft.creativetab.CreativeTabs;
-
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
-import net.minecraftforge.common.config.Property;
-import net.minecraft.item.Item;
-import net.minecraft.block.Block;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 //import com.tower.SkillApplicator;
 //import com.tower.TowerSkills;
 //import com.tower.TowerBaseEntity;
 //import com.tower.TowerBase;
 import com.towerofbabel.towerofbabelmod.babel.ActionBlocker;
+
+import java.util.Map;
 
 
 /*
@@ -46,11 +35,16 @@ public class TowerOfBabel
 	public static class SkillDesc {}
 	public static Map<String, SkillDesc> skills;
 
+	@SidedProxy(clientSide = "com.towerofbabel.towerofbabelmod.gui.GuiProxy")
+	public static GuiProxy proxy;
+
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
 		//Read in configuration values
 		config = new Configuration(event.getSuggestedConfigurationFile());
 		syncConfig();
+
+		proxy.registerEventHandlers();
 
 		//add blocks and items
 		/*
