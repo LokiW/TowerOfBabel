@@ -14,6 +14,8 @@ import net.minecraftforge.common.config.Configuration;
 //import com.tower.TowerBase;
 import com.towerofbabel.towerofbabelmod.babel.ActionBlocker;
 
+import java.util.Map;
+
 
 /*
  * Root file for mod, that causes all other Components to link up
@@ -30,8 +32,8 @@ public class TowerOfBabel
 	 */
 	public static Configuration config;
 	public static boolean dimensionSpecific;
-	//public static class SkillDesc {}
-	//public static Map<String, SkillDesc> skills;
+	public static class SkillDesc {}
+	public static Map<String, SkillDesc> skills;
 
 	@SidedProxy(clientSide = "com.towerofbabel.towerofbabelmod.gui.GuiProxy")
 	public static GuiProxy proxy;

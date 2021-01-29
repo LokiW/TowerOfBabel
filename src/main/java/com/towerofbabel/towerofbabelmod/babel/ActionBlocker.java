@@ -41,6 +41,7 @@ public class ActionBlocker {
 	public static void register() {
 		ActionBlocker ab = new ActionBlocker();
 		MinecraftForge.EVENT_BUS.register(ab);
+
 		FMLCommonHandler.instance().bus().register(ab);
 
 		//block crafting
@@ -86,25 +87,35 @@ public class ActionBlocker {
 	}
 
 	@SubscribeEvent
-	public void attempt(PlayerInteractEvent e) {
+	public void attemptUse(PlayerInteractEvent.RightClickItem e) {
 		EntityPlayer p = e.getEntityPlayer();
 		ItemStack i = p.getActiveItemStack();
 
+		System.out.println("TowerOfBabel:  Player Interacting With " + i.getItem());
 		//Place and Use
+		if(i != null) {
+			if(shouldCancel(p,Actions.USE,i)) {
+				//e.useItem = Result.DENY;
+				e.setResult(Result.DENY);	
+				e.setCanceled(true);
+			}
+		}
+	}
+
+	@SubscribeEvent
+	public void attemtInteract(PlayerInteractEvent.RightClickBlock e) {
+		EntityPlayer p = e.getEntityPlayer();
+		ItemStack i = p.getActiveItemStack();
+		System.out.println("TowerOfBabel:  Player Interacting On Block With " + i.getItem());
+		//Place
 		if(i != null) {
 			if(i.getItem() instanceof ItemBlock) {
 				if(shouldCancel(p,Actions.PLACE,i)) {
 					//e.useItem = Result.DENY;
-					e.setResult(Result.DENY);	
-				}
-			} else {
-				if(shouldCancel(p,Actions.USE,i)) {
-					//e.useItem = Result.DENY;
-					e.setResult(Result.DENY);	
+					e.setUseItem(Result.DENY);
 				}
 			}
 		}
-
 		//Interact
 		if(e.getPos().getY() != 0) {
 			TileEntity interactable = p.getEntityWorld().getTileEntity(e.getPos());
@@ -112,15 +123,29 @@ public class ActionBlocker {
 				ItemStack t = new ItemStack(interactable.getBlockType());
 				if(shouldCancel(p,Actions.INTERACT,t)) {
 					//e.useBlock = Result.DENY;
-					e.setResult(Result.DENY);
+					e.setUseBlock(Result.DENY);
 				}
 			}
 		}
-
+	}
+	
+	@SubscribeEvent
+	public void attemptBreak(PlayerInteractEvent.LeftClickBlock e) {
+		EntityPlayer p = e.getEntityPlayer();
+		ItemStack i = new ItemStack(p.getEntityWorld().getBlockState(e.getPos()).getBlock());
 		//Break
-		if(e instanceof PlayerInteractEvent.LeftClickBlock && shouldCancel(p,Actions.BREAK,i)) {
+		if(shouldCancel(p,Actions.BREAK,i)) {
+			e.setUseBlock(Result.DENY);
 			e.setCanceled(true);
 		}
+
+		ItemStack h = p.getActiveItemStack();
+		if(h != null) {
+			if(shouldCancel(p,Actions.USE,i)) {
+				e.setUseItem(Result.DENY);
+			}	
+		}
+		System.out.println("TowerOfBabel:  Player Left Clicking With " + i.getItem());
 	}
 
 	@SubscribeEvent
@@ -142,43 +167,59 @@ public class ActionBlocker {
 
 	@SubscribeEvent
 	public void wear(PlayerTickEvent e) {
-//		EntityPlayer p = e.player;
-//		World w = p.getEntityWorld();
-//		if(w.isRemote) return;
-//
-//		if(w.getWorldTime() % 20 == 0) {
-//			//armor
-//			NonNullList<ItemStack> armor = p.inventory.armorInventory;
-//			for(int i = 0; i < armor.size(); i++) {
-//				armor.set(i, droppingCheck(w,p,Actions.WEAR,armor.get(i)));
-//			}
-//			//baubles
-//			//TODO
-//			//held item
-//			InventoryPlayer ip = p.inventory;
-//			ItemStack res = droppingCheck(w,p,Actions.HOLD,p.getActiveItemStack());
-//			ip.setInventorySlotContents(ip.currentItem,res);
-//
-//			//carry
-//			if(w.getWorldTime() % 13 == 0) {
-//				for(int slot = 0; slot < p.inventory.getSizeInventory(); slot++) {
-//					ip.setInventorySlotContents(slot, droppingCheck(w,p,Actions.CARRY,ip.getStackInSlot(slot)));
-//				}
-//			}
-//		}
+		EntityPlayer p = e.player;
+		World w = p.getEntityWorld();
+		if(w.isRemote) return;
+
+		if(w.getWorldTime() % 20 == 0) {
+			//armor
+			NonNullList<ItemStack> armor = p.inventory.armorInventory;
+			for(int i = 0; i < armor.size(); i++) {
+				if (armor.get(i).isEmpty()) continue;
+				armor.set(i,  droppingCheck(w,p,Actions.WEAR,armor.get(i)));
+			}
+			//baubles
+			//TODO
+			//held item
+			InventoryPlayer ip = p.inventory;
+			ItemStack res = droppingCheck(w,p,Actions.HOLD,p.getActiveItemStack());
+			ip.setInventorySlotContents(ip.currentItem,res);
+
+			//carry
+			if(w.getWorldTime() % 13 == 0) {
+				for(int slot = 0; slot < p.inventory.getSizeInventory(); slot++) {
+					ip.setInventorySlotContents(slot, droppingCheck(w,p,Actions.CARRY,ip.getStackInSlot(slot)));
+				}
+			}
+		}
 	}
 
 	private ItemStack droppingCheck(World w, EntityPlayer p, Actions a, ItemStack i) {
-		if(i != null && shouldCancel(p, a, i)) {
+		if(i != null && !i.isEmpty() && shouldCancel(p, a, i)) {
 			EntityItem item = new EntityItem(w,p.posX,p.posY+1,p.posZ,i);
 			item.setPickupDelay(200);
 			w.spawnEntity(item);
-			return null;
+			return ItemStack.EMPTY;
 		}
 		return i;
 	}
 	
 	public boolean shouldCancel(EntityPlayer p, Actions a, ItemStack i) {
+		// TEMP FOR TESTING
+		if (Actions.CARRY.equals(a)) {
+			return false;
+		}
+
+		if (Actions.HOLD.equals(a)) {
+			return false;
+		}
+
+		if (Actions.USE.equals(a)) {
+			return true;
+		}
+
+		// END OF TESTING
+
 		if(i == null || SkillCache.can(p.getUniqueID(),a,i)) {
 			return false;
 		} else if (p.getEntityWorld().isRemote || a == Actions.BREAK || a == Actions.WEAR || a == Actions.HOLD || a == Actions.CARRY) {
