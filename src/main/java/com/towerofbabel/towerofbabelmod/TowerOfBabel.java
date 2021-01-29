@@ -13,6 +13,7 @@ import net.minecraftforge.common.config.Configuration;
 //import com.tower.TowerBaseEntity;
 //import com.tower.TowerBase;
 import com.towerofbabel.towerofbabelmod.babel.ActionBlocker;
+import com.towerofbabel.towerofbabelmod.babel.SkillCache;
 
 import java.util.Map;
 
@@ -70,6 +71,9 @@ public class TowerOfBabel
 		GameRegistry.registerBlock(towerbase, "TowerBase");
     GameRegistry.registerTileEntity(TowerBaseEntity.class, "TowerBaseE");
 		*/
+
+		//Setup Skill Cache Based on Config
+		SkillCache.init(config);
 	}
 
 	/*

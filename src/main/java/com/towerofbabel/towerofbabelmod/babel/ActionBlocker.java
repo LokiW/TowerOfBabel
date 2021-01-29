@@ -153,7 +153,6 @@ public class ActionBlocker {
 		EntityPlayer p = e.getEntityPlayer();
 		ItemStack i = p.getActiveItemStack();
 
-		System.out.println(e.getTarget());
 		if(shouldCancel(p,Actions.CARRY,i)) {
 			e.setCanceled(true);
 		}
@@ -182,8 +181,7 @@ public class ActionBlocker {
 			//TODO
 			//held item
 			InventoryPlayer ip = p.inventory;
-			ItemStack res = droppingCheck(w,p,Actions.HOLD,p.getActiveItemStack());
-			ip.setInventorySlotContents(ip.currentItem,res);
+			ip.setInventorySlotContents(ip.currentItem, droppingCheck(w,p,Actions.HOLD,p.getActiveItemStack()));
 
 			//carry
 			if(w.getWorldTime() % 13 == 0) {
@@ -205,21 +203,6 @@ public class ActionBlocker {
 	}
 	
 	public boolean shouldCancel(EntityPlayer p, Actions a, ItemStack i) {
-		// TEMP FOR TESTING
-		if (Actions.CARRY.equals(a)) {
-			return false;
-		}
-
-		if (Actions.HOLD.equals(a)) {
-			return false;
-		}
-
-		if (Actions.USE.equals(a)) {
-			return true;
-		}
-
-		// END OF TESTING
-
 		if(i == null || SkillCache.can(p.getUniqueID(),a,i)) {
 			return false;
 		} else if (p.getEntityWorld().isRemote || a == Actions.BREAK || a == Actions.WEAR || a == Actions.HOLD || a == Actions.CARRY) {

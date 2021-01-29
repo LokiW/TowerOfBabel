@@ -23,26 +23,47 @@ public class SkillCache {
 	 * Checks if player p can do action a with item i
 	 */
 	public static boolean can(long p, Actions a, ItemStack i) {
-		return false;
-		/*
 		Map<Item,Integer> skills = cache.get(p);
 		if(skills == null) {
 			skills = new HashMap<Item, Integer>();
 			cache.put(p,skills);
 		}
 		Integer can = skills.get(i.getItem());
-		return can != null && (can & (1<<a.ordinal())) != 0;*/
+		return can != null && (can & (1<<a.ordinal())) != 0;
 	}
 
 	public static void addSkill(EntityPlayer p, String regex, int pattern) {
-		Map<Item,Integer> skills = cache.get(p.getUniqueID().getLeastSignificantBits());
-		if(skills == null) {
-			skills = new HashMap<Item,Integer>();
-			cache.put(p.getUniqueID().getLeastSignificantBits(), skills);
+		for (Item i : Item.REGISTRY) {
+			String name = i.getUnlocalizedName();
+			if (name == null || !name.matches(regex))
+				continue;
+		
+			addPermissions(p.getUniqueID().getLeastSignificantBits(), i, pattern);
+			return;
 		}
-
 		//Item.itemRegistry.forEach(new Cacher(skills, regex, pattern));
 		//p.addChatMessage(new ChatComponentText(p.getCommandSenderName() + " learned " + regex));
+	}
+
+	public static void addSkill(EntityPlayer p, Item i, Actions a) {
+		addPermissions(p.getUniqueID().getLeastSignificantBits(), i, a.ordinal());
+	}
+
+	private static void addPermissions(long p, Item i, int pattern) {
+		Map<Item, Integer> skills = cache.get(p);
+		if (skills == null) {
+			skills = new HashMap<Item, Integer>();
+			cache.put(p, skills);
+		}
+
+		Integer actions = skills.get(i);
+		
+		if (actions == null);
+			actions = 0;
+
+		actions |= pattern;
+
+		skills.put(i, actions);
 	}
 
 	public static class Cacher implements Consumer<Item> {
