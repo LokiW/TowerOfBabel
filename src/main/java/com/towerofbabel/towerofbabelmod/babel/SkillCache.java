@@ -7,10 +7,13 @@ import net.minecraft.item.Item;
 import java.util.UUID;
 import java.util.*;
 import java.util.function.Consumer;
+import com.towerofbabel.towerofbabelmod.babel.ActionItemTracker;
+
+import com.towerofbabel.towerofbabelmod.TowerOfBabel;
 
 public class SkillCache {
-	// Map from player id to pairs of items and bit list of capabilities for that item
-	private static Map<Long,Map<Item,Integer>> cache = new HashMap<Long,Map<Item,Integer>>();
+	// Map from player id to pairs of actions and a regex for items allowed for that action
+	private static Map<Long,ActionItemTracker> playerRegex = new HashMap<Long,ActionItemTracker>();
 
 	/*
 	 * Checks if player p can do action a with item i
@@ -23,88 +26,41 @@ public class SkillCache {
 	 * Checks if player p can do action a with item i
 	 */
 	public static boolean can(long p, Actions a, ItemStack i) {
-		Map<Item,Integer> skills = cache.get(p);
-		if(skills == null) {
-			skills = new HashMap<Item, Integer>();
-			cache.put(p,skills);
+		ActionItemTracker allowed = playerRegex.get(p);
+		if(allowed == null) {
+			allowed = new ActionItemTracker();
+			playerRegex.put(p, allowed);
 		}
-		Integer can = skills.get(i.getItem());
-		return can != null && (can & (1<<a.ordinal())) != 0;
+		return ((!TowerOfBabel.defaultDisallowed.itemAllowed(a, i)) || allowed.itemAllowed(a, i));
 	}
 
-	public static void addSkill(EntityPlayer p, String regex, int pattern) {
-		for (Item i : Item.REGISTRY) {
-			String name = i.getUnlocalizedName();
-			if (name == null || !name.matches(regex))
-				continue;
-		
-			addPermissions(p.getUniqueID().getLeastSignificantBits(), i, pattern);
-			return;
-		}
-		//Item.itemRegistry.forEach(new Cacher(skills, regex, pattern));
-		//p.addChatMessage(new ChatComponentText(p.getCommandSenderName() + " learned " + regex));
+	public static void clearPlayerCache(UUID p) {
+		clearPlayerCache(p.getLeastSignificantBits());
 	}
 
-	public static void addSkill(EntityPlayer p, Item i, Actions a) {
-		addPermissions(p.getUniqueID().getLeastSignificantBits(), i, a.ordinal());
+	public static void clearPlayerCache(long p) {
+		playerRegex.put(p, new ActionItemTracker());
 	}
 
-	private static void addPermissions(long p, Item i, int pattern) {
-		Map<Item, Integer> skills = cache.get(p);
-		if (skills == null) {
-			skills = new HashMap<Item, Integer>();
-			cache.put(p, skills);
-		}
-
-		Integer actions = skills.get(i);
-		
-		if (actions == null);
-			actions = 0;
-
-		actions |= pattern;
-
-		skills.put(i, actions);
+	public static void allowAction(UUID p, Actions a, ItemStack i) {
+		allowAction(p.getLeastSignificantBits(), a, i.getUnlocalizedName());	
 	}
 
-	public static class Cacher implements Consumer<Item> {
-		private Map<Item,Integer> skill;
-		private String regex;
-		private int pattern;
+	public static void allowAction(long p, Actions a, ItemStack i) {
+		allowAction(p, a, i.getUnlocalizedName());	
+	}
 
-		public Cacher(Map<Item,Integer> skill, String regex, int pattern) {
-			this.skill = skill;
-			this.regex = regex;
-			this.pattern = pattern;
+	public static void allowAction(UUID p, Actions a, String regex) {
+		allowAction(p.getLeastSignificantBits(), a, regex);	
+	}
+
+	public static void allowAction(long p, Actions a, String regex) {
+		ActionItemTracker allowed = playerRegex.get(p);
+		if (allowed == null) {
+			allowed = new ActionItemTracker();
+			playerRegex.put(p, allowed);
 		}
 
-		public void accept(Item item) {
-			String name = item.getUnlocalizedName();
-			if(name == null || !name.matches(regex))
-				return;
-
-			Integer i = skill.get(item);
-
-			if(i == null)
-				i = 0;
-			
-			/*
-			if(add) {
-				i |= pattern;
-			}
-			*/
-
-			skill.put(item, i);
-		}
-
-		public Consumer<Item> andThen(Consumer<? super Item> c) {
-			throw new UnsupportedOperationException();
-		}
+		allowed.addItem(a, regex);
 	}
 }
-
-
-
-
-
-
-

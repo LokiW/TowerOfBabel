@@ -91,7 +91,6 @@ public class ActionBlocker {
 		EntityPlayer p = e.getEntityPlayer();
 		ItemStack i = p.getActiveItemStack();
 
-		System.out.println("TowerOfBabel:  Player Interacting With " + i.getItem());
 		//Place and Use
 		if(i != null) {
 			if(shouldCancel(p,Actions.USE,i)) {
@@ -106,7 +105,6 @@ public class ActionBlocker {
 	public void attemtInteract(PlayerInteractEvent.RightClickBlock e) {
 		EntityPlayer p = e.getEntityPlayer();
 		ItemStack i = p.getActiveItemStack();
-		System.out.println("TowerOfBabel:  Player Interacting On Block With " + i.getItem());
 		//Place
 		if(i != null) {
 			if(i.getItem() instanceof ItemBlock) {
@@ -145,7 +143,6 @@ public class ActionBlocker {
 				e.setUseItem(Result.DENY);
 			}	
 		}
-		System.out.println("TowerOfBabel:  Player Left Clicking With " + i.getItem());
 	}
 
 	@SubscribeEvent
@@ -181,7 +178,7 @@ public class ActionBlocker {
 			//TODO
 			//held item
 			InventoryPlayer ip = p.inventory;
-			ip.setInventorySlotContents(ip.currentItem, droppingCheck(w,p,Actions.HOLD,p.getActiveItemStack()));
+			ip.setInventorySlotContents(ip.currentItem, droppingCheck(w,p,Actions.HOLD,ip.getStackInSlot(ip.currentItem)));
 
 			//carry
 			if(w.getWorldTime() % 13 == 0) {
@@ -193,7 +190,10 @@ public class ActionBlocker {
 	}
 
 	private ItemStack droppingCheck(World w, EntityPlayer p, Actions a, ItemStack i) {
-		if(i != null && !i.isEmpty() && shouldCancel(p, a, i)) {
+		if (i == null || i.isEmpty()) {
+			return i;
+		}
+		if(shouldCancel(p, a, i)) {
 			EntityItem item = new EntityItem(w,p.posX,p.posY+1,p.posZ,i);
 			item.setPickupDelay(200);
 			w.spawnEntity(item);
@@ -213,6 +213,7 @@ public class ActionBlocker {
 			} catch(Exception ex) {
 				mes = a + " " + ex.toString();
 			}
+			System.out.println("TowerOfBabel: " + mes);
 			//p.addChatComponentMessage(new ChatComponentText(mes));
 		} else if(p instanceof EntityPlayerMP) {
 			//synchronize server and client view (as client can't cancel events)
