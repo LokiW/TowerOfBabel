@@ -1,6 +1,7 @@
 package com.towerofbabel.towerofbabelmod;
 
 import com.towerofbabel.towerofbabelmod.gui.GuiProxy;
+import com.towerofbabel.towerofbabelmod.gui.ModGuiHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.SidedProxy;
@@ -17,12 +18,12 @@ import java.util.HashMap;
 //import com.tower.TowerBaseEntity;
 //import com.tower.TowerBase;
 import com.towerofbabel.towerofbabelmod.babel.ActionBlocker;
+
+import net.minecraftforge.fml.common.network.NetworkRegistry;
 import com.towerofbabel.towerofbabelmod.babel.SkillCache;
 import com.towerofbabel.towerofbabelmod.babel.Actions;
 import com.towerofbabel.towerofbabelmod.babel.ActionItemTracker;
 import com.towerofbabel.towerofbabelmod.tower.SkillTree;
-
-import java.util.Map;
 
 
 /*
@@ -34,6 +35,8 @@ public class TowerOfBabel
 	public static final String NAME = "Tower of Babel";
 	public static final String MODID = "towerofbabel";
 	public static final String VERSION = "1.0";
+	@Mod.Instance
+	public static TowerOfBabel instance;
 
 	/**
 	 * Configuration fields, referenced by other parts of the code as constants
@@ -94,6 +97,9 @@ public class TowerOfBabel
 		SkillApplicator.register();
 		TowerSkills.register();
 		*/
+
+		// Register the handler that binds GUI IDs to the corresponding GUI instances.
+		NetworkRegistry.INSTANCE.registerGuiHandler(TowerOfBabel.instance, new ModGuiHandler());
 	}
 
 

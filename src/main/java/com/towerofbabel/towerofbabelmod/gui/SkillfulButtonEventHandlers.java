@@ -6,11 +6,14 @@ import net.minecraft.client.gui.GuiButtonImage;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.gui.inventory.GuiInventory;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.World;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import org.lwjgl.Sys;
 
 // This class listens for all GUI events, and responds to select ones that relate to the rendering of Skillful buttons
 // in the inventory UI (and potentially other places in the future).
@@ -57,13 +60,13 @@ public class SkillfulButtonEventHandlers {
         // Other mods might cause 'guiButtonClick' to fire, as well as the recipe book button.
         // We obviously only want to act if our button was the one clicked.
         if (event.getButton().equals(skillfulButton)) {
-            // DO STUFF HERE
             // Get data
-//            EntityPlayer player = Minecraft.getMinecraft().player;
-//            World world = Minecraft.getMinecraft().world;
+            EntityPlayer player = Minecraft.getMinecraft().player;
+            World world = Minecraft.getMinecraft().world;
 
+            System.out.println(TowerOfBabel.instance);
             // Open GUI
-            // player.openGui(Nutrition.instance, ModGuiHandler.NUTRITION_GUI_ID, world, (int) player.posX, (int) player.posY, (int) player.posZ);
+            player.openGui(TowerOfBabel.instance, ModGuiHandler.SKILL_TREE_GUI_ID, world, (int) player.posX, (int) player.posY, (int) player.posZ);
         } else {
             // Some other button was clicked, but we should recalculate our button position (since new UI might have popped up)
             int[] pos = calculateButtonPosition(event.getGui());
