@@ -134,6 +134,7 @@ public class TowerOfBabel
 				}
 				SkillTree rootTree = new SkillTree(root, root);
 				skillTrees.put(root, rootTree);
+				skills.put(root, rootTree);
 
 				parseConfig(config.getCategory(root), rootTree);
 			}
@@ -183,7 +184,7 @@ public class TowerOfBabel
 				}
 				cur.unlocks.put(conf.get(s).getString(), unlock);
 			} else if (s.toLowerCase().equals("name")) {
-				cur.addName(s);
+				cur.addName(conf.get(s).getString());
 			} else {
 				try {
 					cur.addAction(s, conf.get(s).getStringList());

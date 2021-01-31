@@ -1,6 +1,8 @@
 package com.towerofbabel.towerofbabelmod.gui;
 
+import com.towerofbabel.towerofbabelmod.TOBPlayerProps;
 import com.towerofbabel.towerofbabelmod.TowerOfBabel;
+import com.towerofbabel.towerofbabelmod.tower.SkillTree;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiLabel;
@@ -9,9 +11,15 @@ import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.ResourceLocation;
+import org.lwjgl.Sys;
+
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Map;
 
 public class SkillfulSkillTreeGui extends GuiScreen {
     private GuiButton closeButton;
+    private Map<GuiButton, String> skillButtons = new HashMap<GuiButton, String>();
     private GuiLabel label;
 
     ///////////////////
@@ -74,6 +82,17 @@ public class SkillfulSkillTreeGui extends GuiScreen {
 
         // Draw labels
         // redrawLabels();
+        int i = 0;
+        System.out.println("HERE");
+        for (SkillTree skill : TowerOfBabel.skills.values()) {
+            System.out.println("Adding Skill: " + skill.getName());
+            // Clever algorithm go brr
+            GuiButton newSkillButton = new GuiButton(i + 101, i * 100 + 27, 10, 80, 20, skill.getName());
+            this.skillButtons.put(newSkillButton, skill.getId());
+            buttonList.add(newSkillButton);
+            i++;
+        }
+
     }
 
     // Called when needing to propagate the window with new information
@@ -96,6 +115,12 @@ public class SkillfulSkillTreeGui extends GuiScreen {
             mc.player.closeScreen();
             if (mc.currentScreen == null)
                 mc.setIngameFocus();
+        } else {
+            String skillId = skillButtons.get(button);
+            if (skillId != null) {
+                TOBPlayerProps.addSkill(mc.player, skillId);
+                TOBPlayerProps.updateSkillValues(mc.player);
+            }
         }
     }
 
