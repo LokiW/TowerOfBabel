@@ -18,7 +18,7 @@ public class SkillTree {
 	private String id;
 	private String rootId;
 	//TODO how to allow only one unlock
-	
+
 	public Map<Actions, String> permissions;
 	public Map<Bonuses, Double> bonuses;
 	//TODO conditionals
@@ -39,6 +39,10 @@ public class SkillTree {
 	public void addName(String name) {
 		System.out.println("TowerOfBabel: added pretty name " + name + " to skill " + id);
 		this.name = name;
+	}
+
+	public String getName() {
+		return this.name;
 	}
 
 	public void addAction(String action, String[] items) throws IllegalArgumentException {
