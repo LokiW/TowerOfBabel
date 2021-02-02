@@ -4,10 +4,7 @@ import com.towerofbabel.towerofbabelmod.TOBPlayerProps;
 import com.towerofbabel.towerofbabelmod.TowerOfBabel;
 import com.towerofbabel.towerofbabelmod.tower.SkillTree;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiLabel;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.client.gui.*;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.ResourceLocation;
@@ -32,6 +29,8 @@ public class SkillfulSkillTreeGui extends GuiScreen {
     private final int CLOSE_BUTTON_OFFSET = 7;
     // Container info
     private final ResourceLocation GUI_BORDERS = new ResourceLocation(TowerOfBabel.MODID, "textures/gui/gui.png");
+
+    private final ResourceLocation SKILL_BUTTON_IMAGE = new ResourceLocation(TowerOfBabel.MODID, "textures/gui/mining_buttons.png");
 
     // Offsets
     public int top = 0;
@@ -71,6 +70,8 @@ public class SkillfulSkillTreeGui extends GuiScreen {
                 CLOSE_BUTTON_HEIGHT,
                 I18n.format("gui." + TowerOfBabel.MODID + ":close")
         ));
+
+
 //        buttonList.add(closeButton = new GuiButton(
 //                0,
 //                0,
@@ -87,7 +88,30 @@ public class SkillfulSkillTreeGui extends GuiScreen {
         for (SkillTree skill : TowerOfBabel.skills.values()) {
             System.out.println("Adding Skill: " + skill.getName());
             // Clever algorithm go brr
-            GuiButton newSkillButton = new GuiButton(i + 101, i * 100 + 27, 10, 80, 20, skill.getName());
+            boolean isSkillDisabled = false;
+            boolean isSkillUnlocked = false; // TODO -  TOBPlayerProps.get(mc.player).unlockedSkills.get(skill.something());
+
+            // Skill images exist in 3-wide clumps of button variants.  The leftmost value is the disabled state,
+            // then the 'active' state, and finally, the 'already unlocked' state.  Each state is 20px wide.
+            // Hover states (per MC conventions) are located directly below their normal implementations with a 1-px gap.
+            int imageXOffset = 20;
+            if (isSkillDisabled) {
+                imageXOffset = 0;
+            } else if (isSkillUnlocked) {
+                imageXOffset = 40;
+            }
+
+            GuiButtonImage newSkillButton = new GuiButtonImage(
+                    i + 101, // Button ID
+                    i * 100 + 27, // X of Button on screen
+                    10, // Y of button on screen
+                    20, // Button (and also image) width
+                    18, // Button (and also image) height
+                    imageXOffset, // probably x-offset inside the image file
+                    0, // probably y-offset inside image file
+                    19, // Vertical offset of hover state below the non-hover version.
+                    SKILL_BUTTON_IMAGE
+            );
             this.skillButtons.put(newSkillButton, skill.getId());
             buttonList.add(newSkillButton);
             i++;
@@ -120,6 +144,18 @@ public class SkillfulSkillTreeGui extends GuiScreen {
             if (skillId != null) {
                 TOBPlayerProps.addSkill(mc.player, skillId);
                 TOBPlayerProps.updateSkillValues(mc.player);
+                // TODO - Figure out how to set the button's X-Offset to 40 upon unlock
+//                button = new GuiButtonImage(
+//                        101, // Button ID
+//                        27, // X of Button on screen
+//                        10, // Y of button on screen
+//                        20, // Button (and also image) width
+//                        18, // Button (and also image) height
+//                        40, // probably x-offset inside the image file
+//                        0, // probably y-offset inside image file
+//                        19, // Is this vertical offset of hover state?
+//                        SKILL_BUTTON_IMAGE
+//                );
             }
         }
     }
