@@ -80,10 +80,35 @@ public class TOBPlayerProps {
 		return nbtProps;
 	}
 
-	public static void addSkill(EntityPlayer p, String skillId) {
+	public static boolean isUnlocked(EntityPlayer p, String skillId) {
+		TOBPlayerProps props = TOBPlayerProps.get(p);
+	
+		return props.unlockedSkills.contains(skillId);
+	
+	}
+
+	public static boolean canLearn(EntityPlayer p, String skillId) {
+		TOBPlayerProps props = TOBPlayerProps.get(p);
+
+		// TODO add conditionals
+		// TODO add creative vs survival
+		SkillTree skill = TowerOfBabel.skills.get(skillId);
+		for (String prereq : skill.prereqs.keySet()) {
+			if (prereq != null && !prereq.equals("") && !props.unlockedSkills.contains(prereq)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public static boolean addSkill(EntityPlayer p, String skillId) {
+		if (!TOBPlayerProps.canLearn(p, skillId)) {
+			return false;
+		}
 		TOBPlayerProps props = TOBPlayerProps.get(p);
 	
 		props.unlockedSkills.add(skillId);
+		return true;
 	}
 
 	public static void updateSkillValues(EntityPlayer p) {

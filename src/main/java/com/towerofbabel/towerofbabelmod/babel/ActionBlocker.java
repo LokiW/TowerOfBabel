@@ -89,7 +89,8 @@ public class ActionBlocker {
 	@SubscribeEvent
 	public void attemptUse(PlayerInteractEvent.RightClickItem e) {
 		EntityPlayer p = e.getEntityPlayer();
-		ItemStack i = p.getActiveItemStack();
+		InventoryPlayer ip = p.inventory;
+		ItemStack i = ip.getStackInSlot(ip.currentItem);
 
 		//Place and Use
 		if(i != null) {
@@ -104,7 +105,9 @@ public class ActionBlocker {
 	@SubscribeEvent
 	public void attemtInteract(PlayerInteractEvent.RightClickBlock e) {
 		EntityPlayer p = e.getEntityPlayer();
-		ItemStack i = p.getActiveItemStack();
+		InventoryPlayer ip = p.inventory;
+		ItemStack i = ip.getStackInSlot(ip.currentItem);
+
 		//Place
 		if(i != null) {
 			if(i.getItem() instanceof ItemBlock) {
@@ -137,10 +140,13 @@ public class ActionBlocker {
 			e.setCanceled(true);
 		}
 
-		ItemStack h = p.getActiveItemStack();
+		InventoryPlayer ip = p.inventory;
+		ItemStack h = ip.getStackInSlot(ip.currentItem);
+
 		if(h != null) {
 			if(shouldCancel(p,Actions.USE,i)) {
 				e.setUseItem(Result.DENY);
+				e.setCanceled(true);
 			}	
 		}
 	}
@@ -148,7 +154,8 @@ public class ActionBlocker {
 	@SubscribeEvent
 	public void attemptEntity(EntityInteract e) {
 		EntityPlayer p = e.getEntityPlayer();
-		ItemStack i = p.getActiveItemStack();
+		InventoryPlayer ip = p.inventory;
+		ItemStack i = ip.getStackInSlot(ip.currentItem);
 
 		if(shouldCancel(p,Actions.CARRY,i)) {
 			e.setCanceled(true);
@@ -157,7 +164,9 @@ public class ActionBlocker {
 
 	@SubscribeEvent
 	public void attack(AttackEntityEvent e) {
-		ItemStack i = e.getEntityPlayer().getActiveItemStack();
+		EntityPlayer p = e.getEntityPlayer();
+		InventoryPlayer ip = p.inventory;
+		ItemStack i = ip.getStackInSlot(ip.currentItem);
 		e.setCanceled(shouldCancel(e.getEntityPlayer(),Actions.ATTACK,i));
 	}
 
