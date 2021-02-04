@@ -15,12 +15,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.ArrayList;
+import java.util.UUID;
 
 public class TOBPlayerProps {
 	public static Map<Long, TOBPlayerProps> properites = new HashMap<Long, TOBPlayerProps>();
 
 	public List<String> unlockedSkills = new ArrayList<String>();
-	public Map<Bonuses, Double> stats = new HashMap<Bonuses, Double>();
+	public Map<Bonuses.BONUS, Bonuses.BonusTracker> stats = new HashMap<Bonuses.BONUS, Bonuses.BonusTracker>();
+	public Map<Bonuses.BONUS, UUID> attributes = new HashMap<Bonuses.BONUS, UUID>();
 
 	public static final String PROP_NAME = TowerOfBabel.MODID + "_PlayerProps";
 	public static final String SKILL_LST = TowerOfBabel.MODID + "_UNLOCKED_SKILLS";
@@ -55,7 +57,14 @@ public class TOBPlayerProps {
 		NBTTagCompound nbtStats = props.getCompoundTag(PLAYER_STATS);
 		if (nbtStats != null) {
 			for (String s : nbtStats.getKeySet()) {
-				stats.put(Bonuses.valueOf(s), nbtStats.getDouble(s));
+				Bonuses.BonusTracker bt = new Bonuses.BonusTracker();
+				stats.put(Bonuses.BONUS.valueOf(s), bt);
+
+				NBTTagCompound tracker = nbtStats.getCompoundTag(s);
+				for (String op : tracker.getKeySet()) {
+					bt.values.put(Bonuses.OPERATOR.valueOf(op), tracker.getDouble(op));
+					bt.ids.put(Bonuses.OPERATOR.valueOf(op), UUID.fromString(tracker.getString(op)));
+				}
 			}
 		}
 		
@@ -69,8 +78,14 @@ public class TOBPlayerProps {
 		}
 
 		NBTTagCompound nbtStats = new NBTTagCompound();
-		for (Bonuses b : stats.keySet()) {
-			nbtStats.setDouble(b.toString(), stats.get(b.toString()));
+		for (Bonuses.BONUS b : stats.keySet()) {
+			for (Bonuses.OPERATOR op : stats.get(b).values.keySet()) {
+				NBTTagCompound nbtTracker = new NBTTagCompound();
+				nbtTracker.setDouble(op.toString(), stats.get(b).values.get(op));
+				nbtTracker.setString(op.toString(), stats.get(b).ids.get(op).toString());
+
+				nbtStats.setTag(b.toString(), nbtTracker);
+			}
 		}
 		
 		NBTTagCompound nbtProps = new NBTTagCompound();
@@ -122,8 +137,14 @@ public class TOBPlayerProps {
 				SkillCache.allowAction(p.getUniqueID(), a, skill.permissions.get(a));
 			}
 
-			for (Bonuses b : skill.bonuses.keySet()) {
-				props.stats.put(b, Bonuses.resolveBonus(b, skill.bonuses.get(b), props.stats.get(b)));
+			for (Bonuses.BONUS b : skill.bonuses.keySet()) {
+				Bonuses.BonusTracker bt = props.stats.get(b);
+				if (bt == null) {
+					bt = new Bonuses.BonusTracker();
+					props.stats.put(b, bt);
+				}
+				bt.combine(skill.bonuses.get(b));
+				bt.applyAll(p, b);
 			}
 		}
 	}
