@@ -2,22 +2,37 @@ package com.towerofbabel.towerofbabelmod.gui;
 
 import com.towerofbabel.towerofbabelmod.TOBPlayerProps;
 import com.towerofbabel.towerofbabelmod.TowerOfBabel;
+import com.towerofbabel.towerofbabelmod.babel.Bonuses;
 import com.towerofbabel.towerofbabelmod.tower.SkillTree;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.*;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.ResourceLocation;
-import org.lwjgl.Sys;
+import net.minecraftforge.fml.client.config.GuiUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.text.WordUtils;
 
-import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
+import static net.minecraftforge.fml.client.config.GuiUtils.drawHoveringText;
+
+
 public class SkillfulSkillTreeGui extends GuiScreen {
+    public class SkillIndex {
+        public String skillId;
+        public int index;
+
+        public SkillIndex(String skillId, int index) {
+            this.skillId = skillId;
+            this.index = index;
+        }
+    }
+
     private GuiButton closeButton;
-    private Map<GuiButton, String> skillButtons = new HashMap<GuiButton, String>();
-    private GuiLabel label;
+    private Map<GuiButton, SkillIndex> skillButtons = new HashMap<GuiButton, SkillIndex>();
 
     ///////////////////
     // Magic Numbers //
@@ -41,17 +56,6 @@ public class SkillfulSkillTreeGui extends GuiScreen {
     // Called when GUI is opened or resized
     @Override
     public void initGui() {
-//        // Sync Nutrition info from server to client
-//        Sync.clientRequest();
-
-        // Calculate label offset for long nutrition names
-//        for (Nutrient nutrient : NutrientList.getVisible()) {
-//            int nutrientWidth = fontRenderer.getStringWidth(I18n.format("nutrient." + Nutrition.MODID + ":" + nutrient.name)); // Get width of localized string
-//            nutrientWidth = (nutrientWidth / 4) * 4; // Round to nearest multiple of 4
-//            if (nutrientWidth > labelCharacterPadding)
-//                labelCharacterPadding = nutrientWidth;
-//        }
-
         // Update dynamic GUI size
         ScaledResolution scaledResolution = new ScaledResolution(Minecraft.getMinecraft());
 
@@ -63,72 +67,70 @@ public class SkillfulSkillTreeGui extends GuiScreen {
 
         // Add Close button
         buttonList.add(closeButton = new GuiButton(
-                0,
-                CLOSE_BUTTON_OFFSET,
-                 CLOSE_BUTTON_OFFSET,
-                CLOSE_BUTTON_WIDTH,
-                CLOSE_BUTTON_HEIGHT,
-                I18n.format("gui." + TowerOfBabel.MODID + ":close")
+            0,
+            CLOSE_BUTTON_OFFSET,
+            CLOSE_BUTTON_OFFSET,
+            CLOSE_BUTTON_WIDTH,
+            CLOSE_BUTTON_HEIGHT,
+            I18n.format("gui." + TowerOfBabel.MODID + ":close")
         ));
 
-
-//        buttonList.add(closeButton = new GuiButton(
-//                0,
-//                0,
-//                0,
-//                CLOSE_BUTTON_WIDTH,
-//                CLOSE_BUTTON_HEIGHT,
-//                I18n.format("gui." + TowerOfBabel.MODID + ":close")
-//        ));
-
-        // Draw labels
-        // redrawLabels();
-        int i = 0;
-        System.out.println("HERE");
-        for (SkillTree skill : TowerOfBabel.skills.values()) {
-            System.out.println("Adding Skill: " + skill.getName());
-            // Clever algorithm go brr
-            boolean isSkillDisabled = false;
-            boolean isSkillUnlocked = false; // TODO -  TOBPlayerProps.get(mc.player).unlockedSkills.get(skill.something());
-
-            // Skill images exist in 3-wide clumps of button variants.  The leftmost value is the disabled state,
-            // then the 'active' state, and finally, the 'already unlocked' state.  Each state is 20px wide.
-            // Hover states (per MC conventions) are located directly below their normal implementations with a 1-px gap.
-            int imageXOffset = 20;
-            if (isSkillDisabled) {
-                imageXOffset = 0;
-            } else if (isSkillUnlocked) {
-                imageXOffset = 40;
-            }
-
-            GuiButtonImage newSkillButton = new GuiButtonImage(
-                    i + 101, // Button ID
-                    i * 100 + 27, // X of Button on screen
-                    10, // Y of button on screen
-                    20, // Button (and also image) width
-                    18, // Button (and also image) height
-                    imageXOffset, // probably x-offset inside the image file
-                    0, // probably y-offset inside image file
-                    19, // Vertical offset of hover state below the non-hover version.
-                    SKILL_BUTTON_IMAGE
-            );
-            this.skillButtons.put(newSkillButton, skill.getId());
-            buttonList.add(newSkillButton);
-            i++;
-        }
+        redrawSkills();
 
     }
 
     // Called when needing to propagate the window with new information
-    public void redrawLabels() {
-        // Clear existing labels for nutrition value or screen changes
-        labelList.clear();
+    public void redrawSkills() {
+        // Draw skills
+        int skillIndex = 0;
+        for (SkillTree skill : TowerOfBabel.skills.values()) {
+            drawSkill(skill, skillIndex);
+            skillIndex++;
+        }
+    }
 
-        // Draw title
-        String skillTreeTitle = I18n.format("gui." + TowerOfBabel.MODID + ":skill_tree_title");
-        // 10 = Title Top Padding/Margin (no concept of a border box, so no difference between the two)
-        labelList.add(label = new GuiLabel(fontRenderer, 0, (width / 2) - (fontRenderer.getStringWidth(skillTreeTitle) / 2),  10, 0, 0, 0xffffffff));
-        label.addLine(skillTreeTitle);
+    private void drawSkill(SkillTree skill, int skillIndex) {
+        drawSkill(skill, skillIndex, null);
+    }
+
+    private void drawSkill(SkillTree skill, int skillIndex, SkillButton button) {
+        // Clever algorithm go brr
+        boolean isSkillDisabled = !TOBPlayerProps.canLearn(mc.player, skill.getId());
+        boolean isSkillUnlocked = TOBPlayerProps.isUnlocked(mc.player, skill.getId());
+        
+        // Skill images exist in 3-wide clumps of button variants.  The leftmost value is the disabled state,
+        // then the 'active' state, and finally, the 'already unlocked' state.  Each state is 20px wide.
+        // Hover states (per MC conventions) are located directly below their normal implementations with a 1-px gap.
+        int imageXOffset = 20;
+        if (isSkillDisabled) {
+            imageXOffset = 0;
+        } else if (isSkillUnlocked) {
+            imageXOffset = 40;
+        }
+        if (button != null)
+        {
+            button.setTexStart(imageXOffset, 0);
+        } else {
+
+            int buttonId = skillIndex + 101;
+
+            SkillButton newSkillButton = new SkillButton(
+                buttonId, // Button ID
+                skillIndex * 100 + 27, // X of Button on screen
+                10, // Y of button on screen
+                20, // Button (and also image) width
+                18, // Button (and also image) height
+                imageXOffset, // probably x-offset inside the image file
+                0,  // probably y-offset inside image file
+                19, // Vertical offset of hover state below the non-hover version.
+                SKILL_BUTTON_IMAGE
+            );
+            this.skillButtons.put(newSkillButton, new SkillIndex(skill.getId(), skillIndex));
+
+            // Button ID != Index of Button in ButtonList
+
+            buttonList.add(newSkillButton);
+        }
     }
 
     // Called when button/element is clicked
@@ -140,22 +142,13 @@ public class SkillfulSkillTreeGui extends GuiScreen {
             if (mc.currentScreen == null)
                 mc.setIngameFocus();
         } else {
-            String skillId = skillButtons.get(button);
-            if (skillId != null) {
-                TOBPlayerProps.addSkill(mc.player, skillId);
+            SkillIndex skillIndex = skillButtons.get(button);
+            System.out.println("Adding Skill");
+            if (skillIndex != null) {
+                TOBPlayerProps.addSkill(mc.player, skillIndex.skillId);
                 TOBPlayerProps.updateSkillValues(mc.player);
                 // TODO - Figure out how to set the button's X-Offset to 40 upon unlock
-//                button = new GuiButtonImage(
-//                        101, // Button ID
-//                        27, // X of Button on screen
-//                        10, // Y of button on screen
-//                        20, // Button (and also image) width
-//                        18, // Button (and also image) height
-//                        40, // probably x-offset inside the image file
-//                        0, // probably y-offset inside image file
-//                        19, // Is this vertical offset of hover state?
-//                        SKILL_BUTTON_IMAGE
-//                );
+                drawSkill(TowerOfBabel.skills.get(skillIndex.skillId), skillIndex.index, (SkillButton) button);
             }
         }
     }
@@ -173,8 +166,31 @@ public class SkillfulSkillTreeGui extends GuiScreen {
         // Then draw *our* background - meaning the opaque background for the skills menu.
         drawBackground();
 
+        // Draw buttons, and as we do, check each button to see if any one is hovered.
+        GuiButton hoveredButton = null;
         for (GuiButton button : this.buttonList) {
             button.drawButton(this.mc, mouseX, mouseY, 0);
+            if (mouseX >= button.x && mouseX <= button.x + button.width && mouseY >= button.y && mouseY <= button.y + button.height) {
+                hoveredButton = button;
+            }
+        }
+
+        // If we are hovering a button, and it's a skill button (and thus has an associated skill) we need to give it a tooltip.
+        // Because Z-index of GUI elements is determined by draw order, we can't draw this tooltip inside the 'foreach' loop above.
+        if (hoveredButton != null) {
+            SkillIndex skillIdentifierForHoveredButton = this.skillButtons.get(hoveredButton);
+            if (skillIdentifierForHoveredButton != null) {
+                SkillTree skill = TowerOfBabel.skills.get(skillIdentifierForHoveredButton.skillId);
+                if (skill != null) {
+                    List<String> tooltipText = new LinkedList();
+                    tooltipText.add(skill.getName());
+                    for (Bonuses bonus : skill.bonuses.keySet()) {
+                        tooltipText.add(WordUtils.capitalize(bonus.toString() + " +" + skill.bonuses.get(bonus)));
+                    }
+
+                    GuiUtils.drawHoveringText(tooltipText, mouseX, mouseY, mc.currentScreen.width, mc.currentScreen.height, 100, mc.fontRenderer);
+                }
+            }
         }
     }
 
