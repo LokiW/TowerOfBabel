@@ -25,6 +25,7 @@ import com.towerofbabel.towerofbabelmod.babel.SkillCache;
 import com.towerofbabel.towerofbabelmod.babel.Actions;
 import com.towerofbabel.towerofbabelmod.babel.ActionItemTracker;
 import com.towerofbabel.towerofbabelmod.tower.SkillTree;
+import com.towerofbabel.towerofbabelmod.babel.Bonuses;
 
 
 /*
@@ -158,7 +159,16 @@ public class TowerOfBabel
 			if (c.getName().toLowerCase().equals("numericalbonuses")) {
 				for (String bonus : c.getValues().keySet()) {
 					try {
-						cur.addBonus(bonus, c.get(bonus).getDouble());
+						// split takes regex, have to excape special characters
+						String[] bonus_op = bonus.split("\\.");
+						if (bonus_op.length == 1) {
+							cur.addBonus(bonus, Bonuses.OPERATOR.BASE, c.get(bonus).getDouble());
+						} else if (bonus_op.length == 2) {
+							cur.addBonus(bonus_op[0], bonus_op[1], c.get(bonus).getDouble());
+						} else {
+							System.out.println("TowerOfBabel: Numerical bonus name "+bonus+" split into "+bonus_op.length+" values on a . ");
+							throw new IllegalArgumentException("Numerical bonus names must be in the form bonus.operator");	
+						}
 					} catch (IllegalArgumentException e) {
 						System.out.println("TowerOfBabel: Error Reading Config. Unknown numerical bonus " + bonus);
 					}

@@ -21,7 +21,7 @@ public class SkillTree {
 	//TODO how to allow only one unlock
 
 	public Map<Actions, String> permissions;
-	public Map<Bonuses, Double> bonuses;
+	public Map<Bonuses.BONUS, Bonuses.BonusTracker> bonuses;
 	//TODO conditionals
 	//private List<ConditionalActivation> conditionals;
 
@@ -33,7 +33,7 @@ public class SkillTree {
 		unlocks = new HashMap<String, SkillTree>();
 
 		permissions = new HashMap<Actions, String>();
-		bonuses = new HashMap<Bonuses, Double>();
+		bonuses = new HashMap<Bonuses.BONUS, Bonuses.BonusTracker>();
 	}
 
 	public void addName(String name) {
@@ -53,9 +53,23 @@ public class SkillTree {
 		permissions.put(toAdd, reg);
 	}
 
-	public void addBonus(String bonus, Double value) throws IllegalArgumentException {
-		Bonuses toAdd = Bonuses.valueOf(bonus.toUpperCase());
-		bonuses.put(toAdd, value);
+	public void addBonus(String bonus, String operator, Double value) throws IllegalArgumentException {
+		System.out.println("TowerOfBabel: adding bonus " + bonus + " to skill " + this.id);
+		addBonus(Bonuses.BONUS.valueOf(bonus.toUpperCase()), Bonuses.OPERATOR.valueOf(operator.toUpperCase()), value);
+	}
+
+	public void addBonus(String bonus, Bonuses.OPERATOR operator, Double value) throws IllegalArgumentException {
+		System.out.println("TowerOfBabel: adding bonus " + bonus + " to skill " + this.id);
+		addBonus(Bonuses.BONUS.valueOf(bonus.toUpperCase()), operator, value);
+	}
+
+	public void addBonus(Bonuses.BONUS bonus, Bonuses.OPERATOR operator, Double value) {
+		Bonuses.BonusTracker bt = bonuses.get(bonus);
+		if (bt == null) {
+			bt = new Bonuses.BonusTracker();
+			bonuses.put(bonus, bt);
+		}
+		bt.values.put(operator, value);
 	}
 
 	public String getId() {
