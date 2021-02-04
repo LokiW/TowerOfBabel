@@ -54,15 +54,16 @@ public class SkillTree {
 	}
 
 	public void addBonus(String bonus, String operator, Double value) throws IllegalArgumentException {
+		System.out.println("TowerOfBabel: adding bonus " + bonus + " to skill " + this.id);
 		addBonus(Bonuses.BONUS.valueOf(bonus.toUpperCase()), Bonuses.OPERATOR.valueOf(operator.toUpperCase()), value);
 	}
 
 	public void addBonus(String bonus, Bonuses.OPERATOR operator, Double value) throws IllegalArgumentException {
+		System.out.println("TowerOfBabel: adding bonus " + bonus + " to skill " + this.id);
 		addBonus(Bonuses.BONUS.valueOf(bonus.toUpperCase()), operator, value);
 	}
 
 	public void addBonus(Bonuses.BONUS bonus, Bonuses.OPERATOR operator, Double value) {
-		System.out.println("TowerOfBabel: adding bonus " + bonus + " to skill " + this.id);
 		Bonuses.BonusTracker bt = bonuses.get(bonus);
 		if (bt == null) {
 			bt = new Bonuses.BonusTracker();

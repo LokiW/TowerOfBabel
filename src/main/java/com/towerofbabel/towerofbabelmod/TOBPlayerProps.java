@@ -22,11 +22,9 @@ public class TOBPlayerProps {
 
 	public List<String> unlockedSkills = new ArrayList<String>();
 	public Map<Bonuses.BONUS, Bonuses.BonusTracker> stats = new HashMap<Bonuses.BONUS, Bonuses.BonusTracker>();
-	public Map<Bonuses.BONUS, UUID> attributes = new HashMap<Bonuses.BONUS, UUID>();
 
 	public static final String PROP_NAME = TowerOfBabel.MODID + "_PlayerProps";
 	public static final String SKILL_LST = TowerOfBabel.MODID + "_UNLOCKED_SKILLS";
-	public static final String PLAYER_STATS = TowerOfBabel.MODID + "_PLAYER_STATS";
 	//TODO add event handlers to recalculate bonuses on conidtionals
 
 	public static void register() {
@@ -53,21 +51,6 @@ public class TOBPlayerProps {
 				unlockedSkills.add(s);				
 			}
 		}
-
-		NBTTagCompound nbtStats = props.getCompoundTag(PLAYER_STATS);
-		if (nbtStats != null) {
-			for (String s : nbtStats.getKeySet()) {
-				Bonuses.BonusTracker bt = new Bonuses.BonusTracker();
-				stats.put(Bonuses.BONUS.valueOf(s), bt);
-
-				NBTTagCompound tracker = nbtStats.getCompoundTag(s);
-				for (String op : tracker.getKeySet()) {
-					bt.values.put(Bonuses.OPERATOR.valueOf(op), tracker.getDouble(op));
-					bt.ids.put(Bonuses.OPERATOR.valueOf(op), UUID.fromString(tracker.getString(op)));
-				}
-			}
-		}
-		
 		return this;
 	}
 
@@ -77,20 +60,8 @@ public class TOBPlayerProps {
 			nbtSkills.setString(s,s);
 		}
 
-		NBTTagCompound nbtStats = new NBTTagCompound();
-		for (Bonuses.BONUS b : stats.keySet()) {
-			for (Bonuses.OPERATOR op : stats.get(b).values.keySet()) {
-				NBTTagCompound nbtTracker = new NBTTagCompound();
-				nbtTracker.setDouble(op.toString(), stats.get(b).values.get(op));
-				nbtTracker.setString(op.toString(), stats.get(b).ids.get(op).toString());
-
-				nbtStats.setTag(b.toString(), nbtTracker);
-			}
-		}
-		
 		NBTTagCompound nbtProps = new NBTTagCompound();
 		nbtProps.setTag(SKILL_LST, nbtSkills);
-		nbtProps.setTag(PLAYER_STATS, nbtStats);
 
 		return nbtProps;
 	}
@@ -144,8 +115,11 @@ public class TOBPlayerProps {
 					props.stats.put(b, bt);
 				}
 				bt.combine(skill.bonuses.get(b));
-				bt.applyAll(p, b);
 			}
+		}
+
+		for (Bonuses.BONUS b : props.stats.keySet()) {
+			props.stats.get(b).applyAll(p, b);
 		}
 	}
 

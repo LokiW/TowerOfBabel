@@ -159,12 +159,14 @@ public class TowerOfBabel
 			if (c.getName().toLowerCase().equals("numericalbonuses")) {
 				for (String bonus : c.getValues().keySet()) {
 					try {
-						String[] bonus_op = bonus.split(".");
+						// split takes regex, have to excape special characters
+						String[] bonus_op = bonus.split("\\.");
 						if (bonus_op.length == 1) {
 							cur.addBonus(bonus, Bonuses.OPERATOR.BASE, c.get(bonus).getDouble());
 						} else if (bonus_op.length == 2) {
 							cur.addBonus(bonus_op[0], bonus_op[1], c.get(bonus).getDouble());
 						} else {
+							System.out.println("TowerOfBabel: Numerical bonus name "+bonus+" split into "+bonus_op.length+" values on a . ");
 							throw new IllegalArgumentException("Numerical bonus names must be in the form bonus.operator");	
 						}
 					} catch (IllegalArgumentException e) {

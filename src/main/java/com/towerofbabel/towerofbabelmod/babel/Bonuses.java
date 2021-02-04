@@ -105,9 +105,6 @@ public class Bonuses implements Serializable {
 
 	public static UUID applyBonus(EntityPlayer p, UUID attributeId, BONUS bonus, OPERATOR operator, Double value) {
 		AbstractAttributeMap playerAttributes = p.getAttributeMap();
-		for(IAttributeInstance attr : playerAttributes.getAllAttributes()) {
-			System.out.println("TowerOfBabel: " + attr.getAttribute().getName());	
-		}
 		IAttributeInstance toChange = playerAttributes.getAttributeInstanceByName(bonus.getValue());
 		if (toChange == null) {
 			// TODO instantiate attributes that are not available by default
