@@ -13,6 +13,7 @@ import net.minecraftforge.common.config.ConfigCategory;
 import net.minecraftforge.common.config.Property;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.regex.Pattern;
 //import com.tower.SkillApplicator;
 //import com.tower.TowerSkills;
 //import com.tower.TowerBaseEntity;
@@ -265,5 +266,45 @@ public class TowerOfBabel
 		}
 		*/
 		config.save();
+	}
+
+	public static String constructItemRegex(String original, String itemName) {
+		// Validate ItemName
+		boolean validItem = true;
+		try {
+        Pattern.compile(itemName);
+    } catch (Exception e) {
+        validItem = false;
+    }
+		if (itemName == null  || itemName.equals("") || !validItem) {
+			return original;		
+		}
+
+		// Don't allow construction of invalid regex
+		boolean validOriginal = true;
+	  try {
+        Pattern.compile(original);
+    } catch (Exception e) {
+        validOriginal = false;
+    }
+		String reg;
+		if (original != null && validOriginal) {
+			reg = original;
+		} else {
+			reg = "";	
+		}
+
+		if (reg.contains(itemName))
+			return reg;
+
+		if (reg == null || reg.equals(""))
+			reg = "(";
+		if (!reg.startsWith("("))
+			reg = "(" + reg;
+		if (reg.endsWith(")"))
+			reg = reg.substring(0, reg.length() - 1) + "|";
+		reg += itemName + ")";
+
+		return reg;
 	}
 }
