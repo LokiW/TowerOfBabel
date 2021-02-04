@@ -2,12 +2,15 @@ package com.towerofbabel.towerofbabelmod.gui;
 
 import com.towerofbabel.towerofbabelmod.TOBPlayerProps;
 import com.towerofbabel.towerofbabelmod.TowerOfBabel;
+import com.towerofbabel.towerofbabelmod.babel.Bonuses;
 import com.towerofbabel.towerofbabelmod.tower.SkillTree;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.*;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.client.config.GuiUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.text.WordUtils;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -163,6 +166,7 @@ public class SkillfulSkillTreeGui extends GuiScreen {
         // Then draw *our* background - meaning the opaque background for the skills menu.
         drawBackground();
 
+        // Draw buttons, and as we do, check each button to see if any one is hovered.
         GuiButton hoveredButton = null;
         for (GuiButton button : this.buttonList) {
             button.drawButton(this.mc, mouseX, mouseY, 0);
@@ -171,11 +175,22 @@ public class SkillfulSkillTreeGui extends GuiScreen {
             }
         }
 
+        // If we are hovering a button, and it's a skill button (and thus has an associated skill) we need to give it a tooltip.
+        // Because Z-index of GUI elements is determined by draw order, we can't draw this tooltip inside the 'foreach' loop above.
         if (hoveredButton != null) {
-            List<String> tooltipText = new LinkedList();
-            tooltipText.add("PLACEHOLDER TEXT");
-            tooltipText.add("Placeholder Text 2nd line");
-            GuiUtils.drawHoveringText(tooltipText, mouseX, mouseY, mc.currentScreen.width, mc.currentScreen.height, 100, mc.fontRenderer);
+            SkillIndex skillIdentifierForHoveredButton = this.skillButtons.get(hoveredButton);
+            if (skillIdentifierForHoveredButton != null) {
+                SkillTree skill = TowerOfBabel.skills.get(skillIdentifierForHoveredButton.skillId);
+                if (skill != null) {
+                    List<String> tooltipText = new LinkedList();
+                    tooltipText.add(skill.getName());
+                    for (Bonuses bonus : skill.bonuses.keySet()) {
+                        tooltipText.add(WordUtils.capitalize(bonus.toString() + " +" + skill.bonuses.get(bonus)));
+                    }
+
+                    GuiUtils.drawHoveringText(tooltipText, mouseX, mouseY, mc.currentScreen.width, mc.currentScreen.height, 100, mc.fontRenderer);
+                }
+            }
         }
     }
 
