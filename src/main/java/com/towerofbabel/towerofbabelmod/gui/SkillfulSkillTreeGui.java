@@ -184,7 +184,7 @@ public class SkillfulSkillTreeGui extends GuiScreen {
                 if (skill != null) {
                     List<String> tooltipText = new LinkedList();
                     tooltipText.add(skill.getName());
-                    for (Bonuses bonus : skill.bonuses.keySet()) {
+                    for (Bonuses.BONUS bonus : skill.bonuses.keySet()) {
                         tooltipText.add(WordUtils.capitalize(bonus.toString() + " +" + skill.bonuses.get(bonus)));
                     }
 
