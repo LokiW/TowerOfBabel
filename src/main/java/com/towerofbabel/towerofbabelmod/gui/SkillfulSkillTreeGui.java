@@ -7,9 +7,14 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.*;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.client.config.GuiUtils;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+
+import static net.minecraftforge.fml.client.config.GuiUtils.drawHoveringText;
 
 
 public class SkillfulSkillTreeGui extends GuiScreen {
@@ -85,10 +90,10 @@ public class SkillfulSkillTreeGui extends GuiScreen {
         drawSkill(skill, skillIndex, null);
     }
 
-    private void drawSkill(SkillTree skill, int skillIndex, GuiButtonImageUpdatable button) {
+    private void drawSkill(SkillTree skill, int skillIndex, SkillButton button) {
         // Clever algorithm go brr
-        boolean isSkillDisabled = false;
-        boolean isSkillUnlocked = TOBPlayerProps.get(mc.player).unlockedSkills.indexOf(skill) != 1;
+        boolean isSkillDisabled = !TOBPlayerProps.canLearn(mc.player, skill.getId());
+        boolean isSkillUnlocked = TOBPlayerProps.isUnlocked(mc.player, skill.getId());
         
         // Skill images exist in 3-wide clumps of button variants.  The leftmost value is the disabled state,
         // then the 'active' state, and finally, the 'already unlocked' state.  Each state is 20px wide.
@@ -101,13 +106,12 @@ public class SkillfulSkillTreeGui extends GuiScreen {
         }
         if (button != null)
         {
-            System.out.println("Setting Button for skill " + this.skillButtons.get(button).skillId + " to new button");
             button.setTexStart(imageXOffset, 0);
         } else {
 
             int buttonId = skillIndex + 101;
 
-            GuiButtonImageUpdatable newSkillButton = new GuiButtonImageUpdatable(
+            SkillButton newSkillButton = new SkillButton(
                 buttonId, // Button ID
                 skillIndex * 100 + 27, // X of Button on screen
                 10, // Y of button on screen
@@ -141,7 +145,7 @@ public class SkillfulSkillTreeGui extends GuiScreen {
                 TOBPlayerProps.addSkill(mc.player, skillIndex.skillId);
                 TOBPlayerProps.updateSkillValues(mc.player);
                 // TODO - Figure out how to set the button's X-Offset to 40 upon unlock
-                drawSkill(TowerOfBabel.skills.get(skillIndex.skillId), skillIndex.index, (GuiButtonImageUpdatable) button);
+                drawSkill(TowerOfBabel.skills.get(skillIndex.skillId), skillIndex.index, (SkillButton) button);
             }
         }
     }
@@ -159,8 +163,19 @@ public class SkillfulSkillTreeGui extends GuiScreen {
         // Then draw *our* background - meaning the opaque background for the skills menu.
         drawBackground();
 
+        GuiButton hoveredButton = null;
         for (GuiButton button : this.buttonList) {
             button.drawButton(this.mc, mouseX, mouseY, 0);
+            if (mouseX >= button.x && mouseX <= button.x + button.width && mouseY >= button.y && mouseY <= button.y + button.height) {
+                hoveredButton = button;
+            }
+        }
+
+        if (hoveredButton != null) {
+            List<String> tooltipText = new LinkedList();
+            tooltipText.add("PLACEHOLDER TEXT");
+            tooltipText.add("Placeholder Text 2nd line");
+            GuiUtils.drawHoveringText(tooltipText, mouseX, mouseY, mc.currentScreen.width, mc.currentScreen.height, 100, mc.fontRenderer);
         }
     }
 
