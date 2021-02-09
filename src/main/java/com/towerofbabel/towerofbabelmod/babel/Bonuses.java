@@ -54,16 +54,13 @@ public class Bonuses implements Serializable {
 
 	public static class BonusTracker {
 		public Map<OPERATOR, Double> values;
-		public Map<OPERATOR, UUID> ids;
 
 		public BonusTracker(BonusTracker other) {
 			this.values = other.values;
-			this.ids = other.ids;
 		}
 
 		public BonusTracker() {
 			this.values = new HashMap<OPERATOR, Double>();
-			this.ids = new HashMap<OPERATOR, UUID>();
 		}
 
 		public void combine(BonusTracker other) {
@@ -73,15 +70,12 @@ public class Bonuses implements Serializable {
 				} else {
 					values.put(op, other.values.get(op));
 				}
-				if (ids.get(op) == null) {
-					ids.put(op, other.ids.get(op));
-				}
 			}	
 		}
 
 		public void applyAll(EntityPlayer p, BONUS b) {
 			for (OPERATOR o : values.keySet()) {
-				ids.put(o, Bonuses.applyBonus(p, ids.get(o), b, o, values.get(o)));
+				Bonuses.applyBonus(p, b, o, values.get(o));
 			}
 		}
 
@@ -103,25 +97,26 @@ public class Bonuses implements Serializable {
 
 	}
 
-	public static UUID applyBonus(EntityPlayer p, UUID attributeId, BONUS bonus, OPERATOR operator, Double value) {
+	public static void applyBonus(EntityPlayer p, BONUS bonus, OPERATOR operator, Double value) {
+		UUID id = genId(bonus, operator);
 		AbstractAttributeMap playerAttributes = p.getAttributeMap();
 		IAttributeInstance toChange = playerAttributes.getAttributeInstanceByName(bonus.getValue());
 		if (toChange == null) {
 			// TODO instantiate attributes that are not available by default
 			System.out.println("TowerOfBabel: Player does not have attribute "+bonus);
-			return null;
+			return;
 		}
 
 		switch(operator) {
 			case BASE:
 				toChange.setBaseValue(value);
-				return null;
+				break;
 			case ADD:
 			case MULTIPLIER:
 			case MULTIPLY:
-				return applyAttr(p, toChange, attributeId, bonus, value, operator.getValue());
+				applyAttr(p, toChange, id, bonus, value, operator.getValue());
 			default:
-				return null;
+				break;
 		}
 	}
 
@@ -132,15 +127,14 @@ public class Bonuses implements Serializable {
 	 * modifierType: 0 is add, 1 is multiply, 2 is multiply (affecting other multipliers)
 	 * key needs to be unique to the entity, attr pair
 	 */
-	private static UUID applyAttr(EntityPlayer p, IAttributeInstance attr, UUID oldId, BONUS b, double modifierValue, int modifierType) {
+	private static UUID applyAttr(EntityPlayer p, IAttributeInstance attr, UUID id, BONUS b, double modifierValue, int modifierType) {
 		if (attr == null) {
 			System.out.println("TowerOfBabel: Couldn't update attribute "+b.toString());
-			return oldId;
+			return id;
 		}
 		
-		UUID id = genId(p, oldId, b);
 		if (attr.getModifier(id) != null) {
-			attr.removeModifier(id);		
+			attr.removeModifier(id);
 		}
 
 		AttributeModifier modifier = new AttributeModifier(id, "TOB Bonus "+b.toString(), modifierValue, modifierType);
@@ -148,11 +142,8 @@ public class Bonuses implements Serializable {
 		return id;
 	}
 
-	private static UUID genId(EntityPlayer p, UUID oldId, BONUS b) {
-		if (oldId == null) {
-			return new UUID(key1+b.ordinal(), key2+p.getUniqueID().getLeastSignificantBits());
-		}	
-		return oldId;
+	private static UUID genId(BONUS b, OPERATOR o) {
+		return new UUID(key1+b.ordinal(), key2+o.ordinal());
 	}
 
 }

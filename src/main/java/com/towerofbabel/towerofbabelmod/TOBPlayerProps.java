@@ -14,13 +14,15 @@ import com.towerofbabel.towerofbabelmod.tower.SkillTree;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.ArrayList;
 import java.util.UUID;
 
 public class TOBPlayerProps {
 	public static Map<Long, TOBPlayerProps> properites = new HashMap<Long, TOBPlayerProps>();
 
-	public List<String> unlockedSkills = new ArrayList<String>();
+	public Set<String> unlockedSkills = new HashSet<String>();
 	public Map<Bonuses.BONUS, Bonuses.BonusTracker> stats = new HashMap<Bonuses.BONUS, Bonuses.BonusTracker>();
 
 	public static final String PROP_NAME = TowerOfBabel.MODID + "_PlayerProps";
@@ -42,10 +44,12 @@ public class TOBPlayerProps {
 		return props;
 	}
 
-	public TOBPlayerProps readFromNBT(NBTTagCompound props) {	
+	public TOBPlayerProps readFromNBT(NBTTagCompound props) {
 		if (props == null) return this;
 		
 		NBTTagCompound nbtSkills = props.getCompoundTag(SKILL_LST);
+		if (nbtSkills == null) {
+		}
 		if (nbtSkills != null) {
 			for (String s : nbtSkills.getKeySet()) {
 				unlockedSkills.add(s);				
@@ -100,6 +104,7 @@ public class TOBPlayerProps {
 	public static void updateSkillValues(EntityPlayer p) {
 		TOBPlayerProps props = TOBPlayerProps.get(p);
 		SkillCache.clearPlayerCache(p.getUniqueID());
+		props.stats = new HashMap<Bonuses.BONUS, Bonuses.BonusTracker>();
 
 		for (String s : props.unlockedSkills) {
 			SkillTree skill = TowerOfBabel.skills.get(s);
@@ -145,7 +150,6 @@ public class TOBPlayerProps {
 			NBTTagCompound nbtProps = TOBPlayerProps.get(e.player).writeToNBT();
 			NBTTagCompound base = e.player.getEntityData();
 			base.setTag(PROP_NAME, nbtProps);
-			e.player.writeToNBT(base);
 		}
 
 	}

@@ -26,6 +26,7 @@ import com.towerofbabel.towerofbabelmod.babel.Actions;
 import com.towerofbabel.towerofbabelmod.babel.ActionItemTracker;
 import com.towerofbabel.towerofbabelmod.tower.SkillTree;
 import com.towerofbabel.towerofbabelmod.babel.Bonuses;
+import com.towerofbabel.towerofbabelmod.TOBPlayerProps;
 
 
 /*
@@ -95,6 +96,7 @@ public class TowerOfBabel
 	{
 		//add crafting recipes and event handlers
 		ActionBlocker.register();
+		TOBPlayerProps.register();
 		/*
 		SkillApplicator.register();
 		TowerSkills.register();
