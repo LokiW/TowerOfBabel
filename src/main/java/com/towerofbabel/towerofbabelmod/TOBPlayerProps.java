@@ -48,8 +48,6 @@ public class TOBPlayerProps {
 		if (props == null) return this;
 		
 		NBTTagCompound nbtSkills = props.getCompoundTag(SKILL_LST);
-		if (nbtSkills == null) {
-		}
 		if (nbtSkills != null) {
 			for (String s : nbtSkills.getKeySet()) {
 				unlockedSkills.add(s);				
